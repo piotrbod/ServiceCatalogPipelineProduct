@@ -13,9 +13,15 @@ Parameters:
     Type: String
     Description: GitHub Personal Access Token
     NoEcho: true
+  APIUrl:
+    Type: String
+    Description: Base URL for the API
+  EmployerId:
+    Type: String
+    Description: Employer ID for the API test
   BootstrapVersion:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /cdk-iambootstrap/hnb659fds/version
+    Default: /cdk-bootstrap/hnb659fds/version
     Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
 Resources:
   GitHubTokenSecret09BC4210:
@@ -27,6 +33,279 @@ Resources:
     DeletionPolicy: Delete
     Metadata:
       aws:cdk:path: Cicd02PipelineTemplatesStack/GitHubTokenSecret/Resource
+  AdminRole38563C57:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AdministratorAccess
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/AdminRole/Resource
+  AdminRoleDefaultPolicy1C2AB961:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: BuildProject097C5DB7
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: BuildProject097C5DB7
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: DeployProductionProjectA3F20087
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: DeployProductionProjectA3F20087
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: DeployStagingProject32BAE44F
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: DeployStagingProject32BAE44F
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: TestProject2F1D5F9F
+                    - :*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: TestProject2F1D5F9F
+          - Action:
+              - codebuild:BatchPutCodeCoverages
+              - codebuild:BatchPutTestCases
+              - codebuild:CreateReport
+              - codebuild:CreateReportGroup
+              - codebuild:UpdateReport
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":codebuild:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :report-group/
+                    - Ref: BuildProject097C5DB7
+                    - -*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":codebuild:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :report-group/
+                    - Ref: DeployProductionProjectA3F20087
+                    - -*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":codebuild:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :report-group/
+                    - Ref: DeployStagingProject32BAE44F
+                    - -*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":codebuild:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :report-group/
+                    - Ref: TestProject2F1D5F9F
+                    - -*
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - PipelineArtifactsBucket22248F97
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - PipelineArtifactsBucket22248F97
+                        - Arn
+                    - /*
+          - Action:
+              - kms:Decrypt
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - PipelineArtifactsBucketEncryptionKey01D58D69
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: AdminRoleDefaultPolicy1C2AB961
+      Roles:
+        - Ref: AdminRole38563C57
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/AdminRole/DefaultPolicy/Resource
+  CodeBuildRole728CBADE:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: "2012-10-17"
+      Description: Role assumed by CodeBuild for build operations
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonS3ReadOnlyAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonSSMReadOnlyAccess
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/CodeBuildRole/Resource
+  CodeBuildRoleDefaultPolicy829527DE:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: s3:PutObject
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - arn:aws:s3:::cdk-*-assets-
+                  - Ref: AWS::AccountId
+                  - "-"
+                  - Ref: AWS::Region
+                  - /*
+          - Action:
+              - cloudformation:DescribeStacks
+              - cloudformation:GetTemplate
+              - cloudformation:ListStackResources
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:cloudformation:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :stack/*
+          - Action: iam:PassRole
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:iam::"
+                  - Ref: AWS::AccountId
+                  - :role/cdk-*-cfn-exec-role-
+                  - Ref: AWS::AccountId
+                  - "-"
+                  - Ref: AWS::Region
+        Version: "2012-10-17"
+      PolicyName: CodeBuildRoleDefaultPolicy829527DE
+      Roles:
+        - Ref: CodeBuildRole728CBADE
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/CodeBuildRole/DefaultPolicy/Resource
   PipelineRoleDCFDBB91:
     Type: AWS::IAM::Role
     Properties:
@@ -88,131 +367,107 @@ Resources:
           - Action: sts:AssumeRole
             Effect: Allow
             Resource:
-              Fn::GetAtt:
-                - PipelineBuildCodePipelineActionRoleD77A08E6
-                - Arn
+              - Fn::GetAtt:
+                  - PipelineBuildCodePipelineActionRoleD77A08E6
+                  - Arn
+              - Fn::GetAtt:
+                  - PipelineDeployToProductionCodePipelineActionRole27DCA9A9
+                  - Arn
+              - Fn::GetAtt:
+                  - PipelineDeployToStagingCodePipelineActionRole87E558A9
+                  - Arn
+              - Fn::GetAtt:
+                  - PipelineTestCodePipelineActionRoleDD85885D
+                  - Arn
         Version: "2012-10-17"
       PolicyName: PipelineRoleDefaultPolicy77A82A74
       Roles:
         - Ref: PipelineRoleDCFDBB91
     Metadata:
       aws:cdk:path: Cicd02PipelineTemplatesStack/PipelineRole/DefaultPolicy/Resource
-  MyProjectRole9BBE5233:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-        Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: Cicd02PipelineTemplatesStack/MyProject/Role/Resource
-  MyProjectRoleDefaultPolicyB19B7C29:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-          - Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-            Effect: Allow
-            Resource:
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: MyProject39F7B0AE
-                    - :*
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: MyProject39F7B0AE
-          - Action:
-              - codebuild:BatchPutCodeCoverages
-              - codebuild:BatchPutTestCases
-              - codebuild:CreateReport
-              - codebuild:CreateReportGroup
-              - codebuild:UpdateReport
-            Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:"
-                  - Ref: AWS::Partition
-                  - ":codebuild:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - :report-group/
-                  - Ref: MyProject39F7B0AE
-                  - -*
-          - Action:
-              - s3:Abort*
-              - s3:DeleteObject*
-              - s3:GetBucket*
-              - s3:GetObject*
-              - s3:List*
-              - s3:PutObject
-              - s3:PutObjectLegalHold
-              - s3:PutObjectRetention
-              - s3:PutObjectTagging
-              - s3:PutObjectVersionTagging
-            Effect: Allow
-            Resource:
-              - Fn::GetAtt:
-                  - PipelineArtifactsBucket22248F97
-                  - Arn
-              - Fn::Join:
-                  - ""
-                  - - Fn::GetAtt:
-                        - PipelineArtifactsBucket22248F97
-                        - Arn
-                    - /*
-          - Action:
-              - kms:Decrypt
-              - kms:DescribeKey
-              - kms:Encrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Effect: Allow
-            Resource:
-              Fn::GetAtt:
-                - PipelineArtifactsBucketEncryptionKey01D58D69
-                - Arn
-        Version: "2012-10-17"
-      PolicyName: MyProjectRoleDefaultPolicyB19B7C29
-      Roles:
-        - Ref: MyProjectRole9BBE5233
-    Metadata:
-      aws:cdk:path: Cicd02PipelineTemplatesStack/MyProject/Role/DefaultPolicy/Resource
-  MyProject39F7B0AE:
+  BuildProject097C5DB7:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey:
+        Fn::GetAtt:
+          - PipelineArtifactsBucketEncryptionKey01D58D69
+          - Arn
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
         Type: LINUX_CONTAINER
       ServiceRole:
         Fn::GetAtt:
-          - MyProjectRole9BBE5233
+          - AdminRole38563C57
+          - Arn
+      Source:
+        BuildSpec: |-
+          {
+            "version": "0.2",
+            "environment": {
+              "buildImage": {
+                "type": "CODEBUILD",
+                "defaultComputeType": "BUILD_GENERAL1_MEDIUM"
+              }
+            },
+            "phases": {
+              "install": {
+                "commands": [
+                  "echo Installing dependencies...",
+                  "node --version",
+                  "npm --version",
+                  "npm install"
+                ]
+              },
+              "build": {
+                "commands": [
+                  "echo Building the application...",
+                  "node --version",
+                  "npm --version",
+                  "npm run build"
+                ]
+              },
+              "post_build": {
+                "commands": [
+                  "echo Build completed.",
+                  "node --version",
+                  "npm --version"
+                ]
+              }
+            },
+            "artifacts": {
+              "files": "**/*"
+            }
+          }
+        Type: CODEPIPELINE
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/BuildProject/Resource
+  DeployStagingProject32BAE44F:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey:
+        Fn::GetAtt:
+          - PipelineArtifactsBucketEncryptionKey01D58D69
+          - Arn
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole:
+        Fn::GetAtt:
+          - AdminRole38563C57
           - Arn
       Source:
         BuildSpec: |-
@@ -221,27 +476,35 @@ Resources:
             "phases": {
               "install": {
                 "commands": [
-                  "echo Installing dependencies...",
-                  "npm install"
+                  "echo Installing AWS CDK...",
+                  "node --version",
+                  "npm --version",
+                  "npm install -g aws-cdk"
                 ]
               },
               "build": {
                 "commands": [
-                  "echo Building the application...",
-                  "npm run build"
-                ]
-              },
-              "post_build": {
-                "commands": [
-                  "echo Build completed."
+                  "echo Deploying to staging...",
+                  "node --version",
+                  "npm --version",
+                  "rm -rf node_modules",
+                  "npm install",
+                  "ls -la",
+                  "cdk deploy --require-approval never --context environment=staging"
                 ]
               }
             },
             "artifacts": {
-              "files": "**/*",
-              "discard-paths": "yes"
+              "files": "**/*"
             }
           }
+        Type: CODEPIPELINE
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/DeployStagingProject/Resource
+  TestProject2F1D5F9F:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
         Type: CODEPIPELINE
       Cache:
         Type: NO_CACHE
@@ -249,8 +512,127 @@ Resources:
         Fn::GetAtt:
           - PipelineArtifactsBucketEncryptionKey01D58D69
           - Arn
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole:
+        Fn::GetAtt:
+          - AdminRole38563C57
+          - Arn
+      Source:
+        BuildSpec:
+          Fn::Join:
+            - ""
+            - - |-
+                {
+                  "version": "0.2",
+                  "environment": {
+                    "buildImage": {
+                      "type": "CODEBUILD",
+                      "defaultComputeType": "BUILD_GENERAL1_MEDIUM",
+                      "environmentVariables": {
+                        "API_URL": {
+                          "value": "
+              - Ref: APIUrl
+              - |-
+                "
+                        },
+                        "EMPLOYER_ID": {
+                          "value": "
+              - Ref: EmployerId
+              - |-
+                "
+                        }
+                      }
+                    }
+                  },
+                  "phases": {
+                    "install": {
+                      "commands": [
+                        "echo Installing dependencies...",
+                        "node --version",
+                        "npm --version",
+                        "npm install",
+                        "npm install mocha axios ts-node"
+                      ]
+                    },
+                    "build": {
+                      "commands": [
+                        "echo Running integration tests...",
+                        "aws s3 cp s3://cdk-hnb659fds-assets-227392978404-us-east-1/test/integration test/integration",
+                        "ls -la",
+                        "ls -la test/integration",
+                        "npx mocha -r ts-node/register test/integration/api.test.ts"
+                      ]
+                    }
+                  },
+                  "artifacts": {
+                    "files": "**/*"
+                  }
+                }
+        Type: CODEPIPELINE
     Metadata:
-      aws:cdk:path: Cicd02PipelineTemplatesStack/MyProject/Resource
+      aws:cdk:path: Cicd02PipelineTemplatesStack/TestProject/Resource
+  DeployProductionProjectA3F20087:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey:
+        Fn::GetAtt:
+          - PipelineArtifactsBucketEncryptionKey01D58D69
+          - Arn
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole:
+        Fn::GetAtt:
+          - AdminRole38563C57
+          - Arn
+      Source:
+        BuildSpec: |-
+          {
+            "version": "0.2",
+            "environment": {
+              "buildImage": {
+                "type": "CODEBUILD",
+                "defaultComputeType": "BUILD_GENERAL1_MEDIUM"
+              }
+            },
+            "phases": {
+              "install": {
+                "commands": [
+                  "echo Installing AWS CDK...",
+                  "node --version",
+                  "npm --version",
+                  "npm install -g aws-cdk",
+                  "npm install"
+                ]
+              },
+              "build": {
+                "commands": [
+                  "echo Deploying to production...",
+                  "node --version",
+                  "npm --version",
+                  "cdk deploy --require-approval never --context environment=production"
+                ]
+              }
+            },
+            "artifacts": {
+              "files": "**/*"
+            }
+          }
+        Type: CODEPIPELINE
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/DeployProductionProject/Resource
   PipelineArtifactsBucketEncryptionKey01D58D69:
     Type: AWS::KMS::Key
     Properties:
@@ -335,6 +717,18 @@ Resources:
   PipelineC660917D:
     Type: AWS::CodePipeline::Pipeline
     Properties:
+      ArtifactStore:
+        EncryptionKey:
+          Id:
+            Fn::GetAtt:
+              - PipelineArtifactsBucketEncryptionKey01D58D69
+              - Arn
+          Type: KMS
+        Location:
+          Ref: PipelineArtifactsBucket22248F97
+        Type: S3
+      Name: MyPipeline
+      PipelineType: V2
       RoleArn:
         Fn::GetAtt:
           - PipelineRoleDCFDBB91
@@ -373,7 +767,7 @@ Resources:
                 Version: "1"
               Configuration:
                 ProjectName:
-                  Ref: MyProject39F7B0AE
+                  Ref: BuildProject097C5DB7
               InputArtifacts:
                 - Name: Artifact_Source_GitHub_Source
               Name: Build
@@ -385,17 +779,60 @@ Resources:
                   - Arn
               RunOrder: 1
           Name: Build
-      ArtifactStore:
-        EncryptionKey:
-          Id:
-            Fn::GetAtt:
-              - PipelineArtifactsBucketEncryptionKey01D58D69
-              - Arn
-          Type: KMS
-        Location:
-          Ref: PipelineArtifactsBucket22248F97
-        Type: S3
-      Name: MyPipeline
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName:
+                  Ref: DeployStagingProject32BAE44F
+              InputArtifacts:
+                - Name: Artifact_Build_Build
+              Name: DeployToStaging
+              RoleArn:
+                Fn::GetAtt:
+                  - PipelineDeployToStagingCodePipelineActionRole87E558A9
+                  - Arn
+              RunOrder: 1
+          Name: DeployToStaging
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName:
+                  Ref: TestProject2F1D5F9F
+              InputArtifacts:
+                - Name: Artifact_Build_Build
+              Name: Test
+              RoleArn:
+                Fn::GetAtt:
+                  - PipelineTestCodePipelineActionRoleDD85885D
+                  - Arn
+              RunOrder: 1
+          Name: Test
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName:
+                  Ref: DeployProductionProjectA3F20087
+              InputArtifacts:
+                - Name: Artifact_Build_Build
+              Name: DeployToProduction
+              RoleArn:
+                Fn::GetAtt:
+                  - PipelineDeployToProductionCodePipelineActionRole27DCA9A9
+                  - Arn
+              RunOrder: 1
+          Name: DeployToProduction
     DependsOn:
       - PipelineRoleDefaultPolicy77A82A74
       - PipelineRoleDCFDBB91
@@ -415,11 +852,11 @@ Resources:
       Filters:
         - JsonPath: $.ref
           MatchEquals: refs/heads/{Branch}
+      RegisterWithThirdParty: true
       TargetAction: GitHub_Source
       TargetPipeline:
         Ref: PipelineC660917D
       TargetPipelineVersion: 1
-      RegisterWithThirdParty: true
     Metadata:
       aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/Source/GitHub_Source/WebhookResource
   PipelineBuildCodePipelineActionRoleD77A08E6:
@@ -453,7 +890,7 @@ Resources:
             Effect: Allow
             Resource:
               Fn::GetAtt:
-                - MyProject39F7B0AE
+                - BuildProject097C5DB7
                 - Arn
         Version: "2012-10-17"
       PolicyName: PipelineBuildCodePipelineActionRoleDefaultPolicyC9CB73F8
@@ -461,10 +898,127 @@ Resources:
         - Ref: PipelineBuildCodePipelineActionRoleD77A08E6
     Metadata:
       aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/Build/Build/CodePipelineActionRole/DefaultPolicy/Resource
+  PipelineDeployToStagingCodePipelineActionRole87E558A9:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":iam::"
+                    - Ref: AWS::AccountId
+                    - :root
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/DeployToStaging/DeployToStaging/CodePipelineActionRole/Resource
+  PipelineDeployToStagingCodePipelineActionRoleDefaultPolicyE7E0D516:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - codebuild:BatchGetBuilds
+              - codebuild:StartBuild
+              - codebuild:StopBuild
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - DeployStagingProject32BAE44F
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: PipelineDeployToStagingCodePipelineActionRoleDefaultPolicyE7E0D516
+      Roles:
+        - Ref: PipelineDeployToStagingCodePipelineActionRole87E558A9
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/DeployToStaging/DeployToStaging/CodePipelineActionRole/DefaultPolicy/Resource
+  PipelineTestCodePipelineActionRoleDD85885D:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":iam::"
+                    - Ref: AWS::AccountId
+                    - :root
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/Test/Test/CodePipelineActionRole/Resource
+  PipelineTestCodePipelineActionRoleDefaultPolicy7ECDF2A5:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - codebuild:BatchGetBuilds
+              - codebuild:StartBuild
+              - codebuild:StopBuild
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - TestProject2F1D5F9F
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: PipelineTestCodePipelineActionRoleDefaultPolicy7ECDF2A5
+      Roles:
+        - Ref: PipelineTestCodePipelineActionRoleDD85885D
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/Test/Test/CodePipelineActionRole/DefaultPolicy/Resource
+  PipelineDeployToProductionCodePipelineActionRole27DCA9A9:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":iam::"
+                    - Ref: AWS::AccountId
+                    - :root
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/DeployToProduction/DeployToProduction/CodePipelineActionRole/Resource
+  PipelineDeployToProductionCodePipelineActionRoleDefaultPolicy736EB0CE:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - codebuild:BatchGetBuilds
+              - codebuild:StartBuild
+              - codebuild:StopBuild
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - DeployProductionProjectA3F20087
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: PipelineDeployToProductionCodePipelineActionRoleDefaultPolicy736EB0CE
+      Roles:
+        - Ref: PipelineDeployToProductionCodePipelineActionRole27DCA9A9
+    Metadata:
+      aws:cdk:path: Cicd02PipelineTemplatesStack/Pipeline/DeployToProduction/DeployToProduction/CodePipelineActionRole/DefaultPolicy/Resource
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Analytics: v2:deflate64:H4sIAAAAAAAA/02Py07DMBBFv6V7ZygBCbbQZTdRu2CJHGeAiR9TeRwqZPnfUexI7eqeO3M1jx76F9jv9FU6M9nO0Qj5nLSx6vAVBh21x4RR6at8ZkETMYnXQX9jhHyufg02Koq0h3xih2ux6sCOzF8dVqkowxOOC7kJ8kAXdBRwiDyjqZM2bLHL1r8la+SOP3D8YbZFWS+Qj1g3rfLmSMtqKhQlT5DfF2PbvRs1uZ1470upP6DwEk3ddeAwUSIORQWeEGZ5+H18hX4Pz7tZiLq4hEQe4dT0HyVzTVtbAQAA
+      Analytics: v2:deflate64:H4sIAAAAAAAA/02Pu27DMAxFvyW7zCbpA13bjFkMZ+hYyBLb0noFotygEPTvhSUD8XTPJS/4OMLh+QX2O3njTmnTWRohX5JURpy+fC+jdJgwCnnjz8yoIiZ20stvjJAv1S/BRkWQdJCHYHEpVu2DJfVXh1UqQgWN40xWQ+7pipY89jFMqOqkFVvsuvbvyRrZ8AeOPyGYIoxjyGesmxZ5syR5MRWK4EfI77My7d6VmtxP3PpSxIAc5qjaMxs+Ba8pUfBF+KARJn74PbzCcQ9Pu4mJujj7RA5haPoPFQgaTWUBAAA=
     Metadata:
       aws:cdk:path: Cicd02PipelineTemplatesStack/CDKMetadata/Default
     Condition: CDKMetadataAvailable
@@ -486,7 +1040,13 @@ Conditions:
               - ap-northeast-2
           - Fn::Equals:
               - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
               - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
           - Fn::Equals:
               - Ref: AWS::Region
               - ap-southeast-1
@@ -495,23 +1055,39 @@ Conditions:
               - ap-southeast-2
           - Fn::Equals:
               - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
               - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
           - Fn::Equals:
               - Ref: AWS::Region
               - cn-north-1
           - Fn::Equals:
               - Ref: AWS::Region
               - cn-northwest-1
-      - Fn::Or:
           - Fn::Equals:
               - Ref: AWS::Region
               - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
           - Fn::Equals:
               - Ref: AWS::Region
               - eu-north-1
           - Fn::Equals:
               - Ref: AWS::Region
               - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
           - Fn::Equals:
               - Ref: AWS::Region
               - eu-west-1
@@ -521,6 +1097,12 @@ Conditions:
           - Fn::Equals:
               - Ref: AWS::Region
               - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
           - Fn::Equals:
               - Ref: AWS::Region
               - me-south-1
@@ -533,24 +1115,10 @@ Conditions:
           - Fn::Equals:
               - Ref: AWS::Region
               - us-east-2
-      - Fn::Or:
           - Fn::Equals:
               - Ref: AWS::Region
               - us-west-1
-          - Fn::Equals:
-              - Ref: AWS::Region
-              - us-west-2
-Rules:
-  CheckBootstrapVersion:
-    Assertions:
-      - Assert:
-          Fn::Not:
-            - Fn::Contains:
-                - - "1"
-                  - "2"
-                  - "3"
-                  - "4"
-                  - "5"
-                - Ref: BootstrapVersion
-        AssertDescription: CDK iambootstrap stack version 6 required. Please run 'cdk iambootstrap' with a recent version of the CDK CLI.
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
 
