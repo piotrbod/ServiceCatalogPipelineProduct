@@ -46,6 +46,11 @@ export class Cicd02PipelineTemplatesStack extends cdk.Stack {
       type: 'String',
       description: 'Employer ID for the API test',
     });
+
+    const testsS3Bucket = new cdk.CfnParameter(this, 'TestsS3Bucket', {
+      type: 'String',
+      description: 'S3 bucket with all pipeline tests',
+    });
     
     // Create the Secrets Manager secret with an automatically generated name
     const githubTokenSecret = new secretsmanager.Secret(this, 'GitHubTokenSecret', {
@@ -123,15 +128,10 @@ export class Cicd02PipelineTemplatesStack extends cdk.Stack {
       role: adminRole,
       environment: {
         buildImage: codebuild.LinuxBuildImage.fromCodeBuildImageId('aws/codebuild/standard:7.0'),
+        computeType: codebuild.ComputeType.MEDIUM,
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
-        environment: {
-          buildImage: {
-            type: codebuild.ImagePullPrincipalType.CODEBUILD,
-            defaultComputeType: codebuild.ComputeType.MEDIUM,
-          },
-        },
         phases: {
           install: {
             commands: [
@@ -168,6 +168,7 @@ export class Cicd02PipelineTemplatesStack extends cdk.Stack {
       role: adminRole,
       environment: {
         buildImage: codebuild.LinuxBuildImage.fromCodeBuildImageId('aws/codebuild/standard:7.0'),
+        computeType: codebuild.ComputeType.MEDIUM,
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
@@ -203,37 +204,40 @@ export class Cicd02PipelineTemplatesStack extends cdk.Stack {
       role: adminRole,
       environment: {
         buildImage: codebuild.LinuxBuildImage.fromCodeBuildImageId('aws/codebuild/standard:7.0'),
+        computeType: codebuild.ComputeType.MEDIUM,
+        environmentVariables: {
+          API_URL: { value: apiUrl.valueAsString },
+          EMPLOYER_ID: { value: employerId.valueAsString },
+          S3_BUCKET: { value: testsS3Bucket.valueAsString },
+        },
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
-        environment: {
-          buildImage: {
-            type: codebuild.ImagePullPrincipalType.CODEBUILD,
-            defaultComputeType: codebuild.ComputeType.MEDIUM,
-            environmentVariables: {
-              API_URL: { value: apiUrl.valueAsString },
-              EMPLOYER_ID: { value: employerId.valueAsString },
-            },
-          },
-        },
         phases: {
           install: {
             commands: [
               'echo Installing dependencies...',
               'node --version',
               'npm --version',
+              'rm -rf node_modules',
               'npm install',
-              'npm install mocha axios ts-node', // Install Mocha, Axios, and ts-node
             ],
           },
           build: {
             commands: [
               'echo Running integration tests...',
-              'aws s3 cp s3://cdk-hnb659fds-assets-227392978404-us-east-1/test/integration test/integration',
+              'aws s3 cp s3://$S3_BUCKET/test/integration test/integration --recursive',
               'ls -la',
               'ls -la test/integration',
-              'npx mocha -r ts-node/register test/integration/api.test.ts', // Run the integration test
+              'npx jest', // Run the integration test
             ],
+          },
+        },
+        environment: {
+          variables: {
+            API_URL: apiUrl.valueAsString,
+            EMPLOYER_ID: employerId.valueAsString,
+            S3_BUCKET: testsS3Bucket.valueAsString,
           },
         },
         artifacts: {
@@ -247,15 +251,10 @@ export class Cicd02PipelineTemplatesStack extends cdk.Stack {
       role: adminRole,
       environment: {
         buildImage: codebuild.LinuxBuildImage.fromCodeBuildImageId('aws/codebuild/standard:7.0'),
+        computeType: codebuild.ComputeType.MEDIUM,
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
-        environment: {
-          buildImage: {
-            type: codebuild.ImagePullPrincipalType.CODEBUILD,
-            defaultComputeType: codebuild.ComputeType.MEDIUM,
-          },
-        },
         phases: {
           install: {
             commands: [

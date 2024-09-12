@@ -19,6 +19,9 @@ Parameters:
   EmployerId:
     Type: String
     Description: Employer ID for the API test
+  TestsS3Bucket:
+    Type: String
+    Description: S3 bucket with all pipeline tests
   BootstrapVersion:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /cdk-bootstrap/hnb659fds/version
@@ -397,7 +400,7 @@ Resources:
           - PipelineArtifactsBucketEncryptionKey01D58D69
           - Arn
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
@@ -410,12 +413,6 @@ Resources:
         BuildSpec: |-
           {
             "version": "0.2",
-            "environment": {
-              "buildImage": {
-                "type": "CODEBUILD",
-                "defaultComputeType": "BUILD_GENERAL1_MEDIUM"
-              }
-            },
             "phases": {
               "install": {
                 "commands": [
@@ -460,7 +457,7 @@ Resources:
           - PipelineArtifactsBucketEncryptionKey01D58D69
           - Arn
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
@@ -513,7 +510,20 @@ Resources:
           - PipelineArtifactsBucketEncryptionKey01D58D69
           - Arn
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        EnvironmentVariables:
+          - Name: API_URL
+            Type: PLAINTEXT
+            Value:
+              Ref: APIUrl
+          - Name: EMPLOYER_ID
+            Type: PLAINTEXT
+            Value:
+              Ref: EmployerId
+          - Name: S3_BUCKET
+            Type: PLAINTEXT
+            Value:
+              Ref: TestsS3Bucket
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
@@ -529,44 +539,40 @@ Resources:
             - - |-
                 {
                   "version": "0.2",
-                  "environment": {
-                    "buildImage": {
-                      "type": "CODEBUILD",
-                      "defaultComputeType": "BUILD_GENERAL1_MEDIUM",
-                      "environmentVariables": {
-                        "API_URL": {
-                          "value": "
-              - Ref: APIUrl
-              - |-
-                "
-                        },
-                        "EMPLOYER_ID": {
-                          "value": "
-              - Ref: EmployerId
-              - |-
-                "
-                        }
-                      }
-                    }
-                  },
                   "phases": {
                     "install": {
                       "commands": [
                         "echo Installing dependencies...",
                         "node --version",
                         "npm --version",
-                        "npm install",
-                        "npm install mocha axios ts-node"
+                        "rm -rf node_modules",
+                        "npm install"
                       ]
                     },
                     "build": {
                       "commands": [
                         "echo Running integration tests...",
-                        "aws s3 cp s3://cdk-hnb659fds-assets-227392978404-us-east-1/test/integration test/integration",
+                        "aws s3 cp s3://$S3_BUCKET/test/integration test/integration --recursive",
                         "ls -la",
                         "ls -la test/integration",
-                        "npx mocha -r ts-node/register test/integration/api.test.ts"
+                        "npx jest"
                       ]
+                    }
+                  },
+                  "environment": {
+                    "variables": {
+                      "API_URL": "
+              - Ref: APIUrl
+              - |-
+                ",
+                      "EMPLOYER_ID": "
+              - Ref: EmployerId
+              - |-
+                ",
+                      "S3_BUCKET": "
+              - Ref: TestsS3Bucket
+              - |-
+                "
                     }
                   },
                   "artifacts": {
@@ -588,7 +594,7 @@ Resources:
           - PipelineArtifactsBucketEncryptionKey01D58D69
           - Arn
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
@@ -601,12 +607,6 @@ Resources:
         BuildSpec: |-
           {
             "version": "0.2",
-            "environment": {
-              "buildImage": {
-                "type": "CODEBUILD",
-                "defaultComputeType": "BUILD_GENERAL1_MEDIUM"
-              }
-            },
             "phases": {
               "install": {
                 "commands": [

@@ -1,0 +1,5 @@
+# GET request to retrieve employees
+GET https://3dtomawi39.execute-api.us-east-1.amazonaws.com/employees?employerId=emp2
+
+# If you need to specify headers (e.g., for authentication), you can add them like this:
+# Authorization: Bearer YOUR_ACCESS_TOKEN
